@@ -1,138 +1,121 @@
 # OTELIER-WEB
 
-A hospitality-focused mini product: React 18 + Vite + Tailwind with Supabase auth, **location-based hotel search** (Google Places Autocomplete), Amadeus API, and hotel comparison charts.
+A hotel comparison web application built with React. Users can search hotels by city and country, compare options using charts, and see a data-driven “Suggested” hotel. The app uses **Supabase** for authentication and **Amadeus** for hotel data, with a focus on comparison, recommendations, and clear UX.
+
+---
+
+## Live Demo
+
+**https://otelier-compare.vercel.app**
+
+If the main domain is unreachable (e.g. due to network restrictions), use the deployment-specific Vercel URL provided in your Vercel project dashboard.
+
+---
 
 ## Features
 
-- **Authentication**: Sign up, login, logout via Supabase (email/password). Session/JWT used for protected routes.
-- **Location search**: OpenStreetMap Nominatim (free, no API key) for city, neighborhood, or landmark; returns coordinates for radius-based hotel search. No hard-coded city list.
-- **Hotel search**: Amadeus API (OAuth2 + hotel list/offers). Uses latitude/longitude when a location is selected, otherwise falls back to city code. Filters: location, check-in/out dates, guests.
-- **UI**: Dashboard with filter bar, hotel cards (name, price, rating, distance), infinite scroll.
-- **Comparison**: Select up to 5 hotels via checkbox; selection persisted in `localStorage`. Compare drawer with Recharts (price bar chart, rating bar chart). Comparison only enabled when ≥2 hotels selected.
-- **State**: AuthContext (auth state), CompareContext (selected hotels). No Redux.
-- **Role-based UI**: Admin users (via `user_metadata.role === 'admin'`) see extra filters: price range, rating threshold, hotel chain (client-side gated).
-- **Docker**: Optional local setup via Dockerfile; Vercel deployment unchanged.
-- **Dark mode**: Toggle in the Navbar; supports system preference with manual override and persistence in `localStorage`.
+- **User authentication** — Login and signup via Supabase (email/password). Protected dashboard; session persists across reloads.
+- **Search hotels by city and country** — Location search (Nominatim) with optional check-in/out and guests. Results from Amadeus API.
+- **Graceful fallback when hotel data is unavailable** — Capital-city fallback for unsupported cities; clear messaging when showing results from a different city.
+- **Hotel comparison** — Compare hotels by price, rating, distance, and other parameters. Select up to 5 hotels via checkboxes; selection persisted in `localStorage`.
+- **Visual comparison** — Compare drawer with bar charts for price, rating, and distance from airport (Recharts).
+- **“Suggested” hotel** — One hotel is marked as recommended using a client-side weighted scoring algorithm (same for all users).
+- **Role-based UI**
+  - **Normal users** see a simplified interface: hotel cards, compare, charts, and Suggested badge.
+  - **Admin users** see the same plus advanced filters (min rating, max price, max distance), sorting (best overall, lowest price, highest rating), and optional score labels on cards.
+  - **Admin/User role indicator** is shown in the navbar when logged in (read-only badge).
 
-## Setup
+---
+
+## Recommendation Logic
+
+Hotels are scored on the client using normalized parameters:
+
+- **Price** (lower is better)
+- **Rating** (higher is better)
+- **Distance** (e.g. from airport; lower is better)
+- **Review count** (higher is better as a trust signal)
+
+Values are normalized to 0–1 and combined with fixed weights. The hotel with the **highest score** is marked as **Suggested**. The algorithm is the same for all users; roles only affect which UI controls (filters, sorting, debug info) are visible.
+
+---
+
+## Role-Based UI
+
+- Roles are **resolved on the frontend** only. There is no backend role enforcement, no database role tables, and no Supabase RLS for roles.
+- A **specific email address** is treated as admin; all other authenticated users are “user.” Admin users see additional UI (filters, sorting, optional score labels).
+- The navbar shows a **User** or **Admin** badge when logged in; it updates automatically on login/logout.
+- This approach keeps the implementation simple and is suitable for a frontend-focused assignment where the goal is conditional UI, not permission enforcement.
+
+---
+
+## How to Run Locally
 
 1. **Clone and install**
 
    ```bash
-   git clone <repo-url>
-   cd otelier-web
+   git clone <repository-url>
+   cd <project-folder>
    npm install
    ```
 
 2. **Environment variables**
 
-   Copy `.env.example` to `.env` and fill in:
+   Create a `.env` file in the project root (see `.env.example`). You need:
 
-   - `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY`: From [Supabase](https://supabase.com) → Project Settings → API.
-   - `VITE_AMADEUS_KEY` / `VITE_AMADEUS_SECRET`: From [Amadeus for Developers](https://developers.amadeus.com) (Self-Service APIs, create an app).
-3. **Run locally**
+   - **`VITE_SUPABASE_URL`** — Your Supabase project URL.
+   - **`VITE_SUPABASE_ANON_KEY`** — Your Supabase anonymous (public) key.
+
+   Both values are in the [Supabase Dashboard](https://supabase.com) → Project Settings → API.
+
+   Optional (for hotel search):
+
+   - **`VITE_AMADEUS_KEY`** / **`VITE_AMADEUS_SECRET`** — From [Amadeus for Developers](https://developers.amadeus.com).
+
+3. **Start the dev server**
 
    ```bash
    npm run dev
    ```
 
-   Open `http://localhost:5173`. Sign up or log in to reach the dashboard.
+   Open `http://localhost:5173`. Sign up or log in to access the dashboard.
 
-## Auth flow
+---
 
-- **Sign up**: `supabase.auth.signUp({ email, password })`. Supabase may require email confirmation depending on project settings.
-- **Login**: `supabase.auth.signInWithPassword({ email, password })`. Session (including JWT) is stored by Supabase client; `AuthContext` exposes `user`, `session`, and `token` (for protected API calls if needed).
-- **Protected route**: Dashboard route is wrapped in `ProtectedRoute`; if not authenticated, user is redirected to `/login`.
-- **Logout**: `supabase.auth.signOut()`; no hardcoded tokens.
+## Tech Stack
 
-## API usage (Amadeus)
+- **React** (with hooks)
+- **Supabase** (Auth)
+- **Amadeus API** (hotel search and offers)
+- **Vite**
+- **Vercel** (hosting)
 
-- **OAuth**: Client credentials grant to `https://test.api.amadeus.com/v1/security/oauth2/token`. Token is cached until near expiry.
-- **Hotel data**: 
-  - When a location is selected (Nominatim geocoding), we use `GET /v1/reference-data/locations/hotels/by-geocode?latitude=&longitude=&radius=5` for radius-based search. If that endpoint is unavailable, we fall back to by-city (Paris).
-  - Otherwise hotel list by city: `GET /v1/reference-data/locations/hotels/by-city?cityCode=...`.
-  - When check-in/out and hotel IDs are available, we optionally call `GET /v2/shopping/hotel-offers` for sample prices; results are merged into the list. If that call fails or isn’t configured, fallback demo price/rating are applied so the UI still works.
-- **Pagination**: Results are paginated in memory (page size 10); infinite scroll fetches the next page when the user scrolls near the bottom and appends to the list.
-- All Amadeus logic lives in `src/api/amadeus.js`; Axios is used for requests. Failures are caught and surfaced as error state on the dashboard.
+Additional: Tailwind CSS, React Router, Recharts, Axios. Context API for auth and compare state.
 
-## Assumptions
+---
 
-- Supabase project has Email auth enabled; email confirmation is optional (can be turned off in Supabase for faster testing).
-- Amadeus test/sandbox keys are used; production would use live keys and possibly different base URL.
-- Compare list is stored only in `localStorage` (no backend). Clearing site data clears the compare list.
+## Deployment
 
-## Infinite Scroll Implementation
+The app is deployed on **Vercel**. Automatic deployments are triggered from the main branch. Configure the same environment variables in the Vercel project (Supabase and, if needed, Amadeus). Build command: `npm run build`; output: `dist`. SPA routing is handled via `vercel.json` rewrites.
 
-- The “Load more” button has been replaced with **infinite scroll** using the **Intersection Observer API**.
-- A reusable hook `useInfiniteScroll` (`src/hooks/useInfiniteScroll.js`) observes a sentinel element at the bottom of the list. When it becomes visible, the hook calls `loadMore` from `useHotels`, which fetches the next page and appends results.
-- **Why Intersection Observer over scroll events**: Better performance (no scroll throttling), built-in visibility detection, and automatic cleanup when the element is visible. Duplicate requests are prevented by checking `loading` and `hasMore` before calling `loadMore`. The observer is disconnected on unmount.
-- Filters are preserved while scrolling; only the “next page” is requested with the same filter state.
+---
 
-## Role-Based UI
+## Project Structure (summary)
 
-- **Roles** are read from Supabase **user metadata**: `user.user_metadata.role`. Default is `user`; set to `admin` in the Supabase dashboard (Authentication → Users → edit user → User Metadata: `{ "role": "admin" }`) or via an admin-only update flow.
-- **AuthContext** exposes `role` and `isAdmin`. The **RequireRole** component (`src/components/RequireRole.jsx`) renders its children only when the current user has one of the allowed roles.
-- **Admin-only UI**: When `role === 'admin'`, the dashboard shows an **Admin filters** panel (price range, min rating, hotel chain). These filters are applied **client-side** to the already-fetched hotel list; no backend changes are required. The panel is visually distinct (Tailwind amber styling).
-- **Why client-side gated**: The assignment specifies no backend for roles; the UI simply hides admin controls from non-admins. For production, sensitive actions would be enforced server-side.
+- `src/context/` — AuthContext (user, session, role), CompareContext (selected hotels).
+- `src/api/amadeus.js` — Amadeus OAuth, hotel list/offers, capital fallback.
+- `src/hooks/` — useHotels (search, filters, pagination), useInfiniteScroll.
+- `src/components/` — Navbar (with role badge), Filters, AdminFilters, HotelCard, CompareDrawer, Charts.
+- `src/pages/` — Login, Signup, Dashboard.
+- `src/utils/hotelScoring.js` — Client-side scoring and “Suggested” selection.
 
-## Docker (Optional Local Setup)
+---
 
-- Docker is **optional** and does not affect Vercel deployment. Use it for a consistent local dev environment.
-- **Build and run** (from project root, with a `.env` file present):
+## Optional: Docker
 
-  ```bash
-  docker build -t otelier-web .
-  docker run -p 5173:5173 --env-file .env otelier-web
-  ```
+A Dockerfile is provided for local containerized runs. It does not change Vercel deployment. From the project root, with a `.env` file present:
 
-- **No secrets in the image**: The Dockerfile does not copy or hardcode `.env`. Pass env vars at run time with `--env-file .env`.
-- **Why optional**: The app runs with `npm run dev` or deploys to Vercel without Docker; Docker is for those who prefer containerized local development.
-
-## Dark Mode
-
-Supports system preference with manual override and persistence. A theme toggle in the Navbar (top-right) switches between light and dark. The choice is stored in `localStorage` under `hotel-compare-theme`. On first visit, the app uses the stored value if present, otherwise the system `prefers-color-scheme` setting. Tailwind’s class-based dark mode is used (`.dark` on `<html>`); no inline styles. The toggle is keyboard-focusable and has `aria-label="Toggle dark mode"`.
-
-## Deployment (Vercel)
-
-1. Push the repo to GitHub (or connect another Git provider).
-2. In Vercel, import the project and set the same env vars (`VITE_SUPABASE_*`, `VITE_AMADEUS_*`).
-3. Build command: `npm run build`; output directory: `dist`. SPA routing is handled by `vercel.json` rewrites.
-4. Deploy. The app works as an SPA with client-side routing; no server-side secrets (all keys are Vite env and exposed to the client as per requirement).
-
-## Project structure
-
+```bash
+docker build -t otelier-web .
+docker run -p 5173:5173 --env-file .env otelier-web
 ```
-src/
-├── api/amadeus.js       # Amadeus OAuth + hotel list/offers
-├── auth/supabase.js     # Supabase client
-├── context/
-│   ├── AuthContext.jsx
-│   └── CompareContext.jsx
-├── hooks/
-│   ├── useHotels.js     # Search, filters, load more
-│   └── useInfiniteScroll.js
-├── components/
-│   ├── Navbar.jsx
-│   ├── LocationSearch.jsx  # OSM Nominatim geocoding (city, area, landmark; free, no API key)
-│   ├── HotelCard.jsx
-│   ├── Filters.jsx
-│   ├── AdminFilters.jsx # Admin-only filters (price, rating, chain)
-│   ├── RequireRole.jsx  # Role-gated wrapper
-│   ├── CompareDrawer.jsx
-│   ├── Charts.jsx       # Recharts price & rating
-│   └── Loader.jsx
-├── pages/
-│   ├── Login.jsx
-│   ├── Signup.jsx
-│   └── Dashboard.jsx
-├── App.jsx
-├── main.jsx
-└── index.css
-```
-
-## Tech stack
-
-- React 18 (hooks), Vite, Tailwind CSS
-- Supabase Auth (email/password)
-- Axios, Recharts
-- Context API, localStorage for compare list

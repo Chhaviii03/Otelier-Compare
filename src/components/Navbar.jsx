@@ -4,7 +4,7 @@ import { useCompare } from '../context/CompareContext'
 import { ThemeToggle } from './ThemeToggle'
 
 export function Navbar() {
-  const { user, signOut, isAuthenticated } = useAuth()
+  const { user, role, signOut, isAuthenticated } = useAuth()
   const { selected, canCompare } = useCompare()
   const navigate = useNavigate()
 
@@ -51,6 +51,16 @@ export function Navbar() {
                   </div>
                   <span className="text-sm text-gray-700 dark:text-gray-300">
                     Hi, {displayName}
+                  </span>
+                  <span
+                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold select-none ${
+                      role === 'admin'
+                        ? 'bg-amber-400 dark:bg-amber-500 text-amber-950 dark:text-amber-950'
+                        : 'bg-slate-200 dark:bg-slate-600 text-slate-700 dark:text-slate-200'
+                    }`}
+                    aria-label={`Role: ${role === 'admin' ? 'Admin' : 'User'}`}
+                  >
+                    {role === 'admin' ? 'Admin' : 'User'}
                   </span>
                 </div>
                 <button

@@ -60,8 +60,11 @@ export function AuthProvider({ children }) {
     await supabase.auth.signOut()
   }
 
-  // Role from Supabase user_metadata. Updated on initial load and on auth state change. Default 'user'; set admin in Supabase Dashboard (user_metadata.role = "admin").
-  const role = session?.user?.user_metadata?.role || user?.user_metadata?.role || 'user'
+  // Admin is determined by a known email (no user_metadata editing in Supabase). All other users are "user".
+  const role =
+    session?.user?.email === 'chhavi.bhatt@ieee.org'
+      ? 'admin'
+      : session?.user?.user_metadata?.role || 'user'
 
   const value = {
     user,
