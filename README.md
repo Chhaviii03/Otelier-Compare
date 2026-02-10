@@ -8,8 +8,6 @@ A hotel comparison web application built with React. Users can search hotels by 
 
 **https://otelier-compare.vercel.app**
 
-If the main domain is unreachable (e.g. due to network restrictions), use the deployment-specific Vercel URL provided in your Vercel project dashboard.
-
 ---
 
 ## Features
