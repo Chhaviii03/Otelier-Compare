@@ -26,9 +26,18 @@ export function AuthProvider({ children }) {
     return () => subscription.unsubscribe()
   }, [])
 
-  const signUp = async (email, password) => {
+  const signUp = async (email, password, name) => {
     setError(null)
-    const { data, error: e } = await supabase.auth.signUp({ email, password })
+    const { data, error: e } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          name: name || undefined,
+          role: 'user',
+        },
+      },
+    })
     if (e) {
       setError(e.message)
       return { error: e.message }
@@ -51,8 +60,8 @@ export function AuthProvider({ children }) {
     await supabase.auth.signOut()
   }
 
-  // Role from Supabase user metadata (client-side only). Default 'user'; set 'admin' in Supabase dashboard or via updateUser.
-  const role = user?.user_metadata?.role ?? 'user'
+  // Role from Supabase user_metadata. Updated on initial load and on auth state change. Default 'user'; set admin in Supabase Dashboard (user_metadata.role = "admin").
+  const role = session?.user?.user_metadata?.role || user?.user_metadata?.role || 'user'
 
   const value = {
     user,

@@ -13,40 +13,50 @@ export function Navbar() {
     navigate('/login')
   }
 
+  const displayName = user?.user_metadata?.name || 'User'
+  const initial = (displayName || 'U').charAt(0).toUpperCase()
+
   return (
-    <nav className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm transition-colors duration-200">
+    <nav className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-b border-gray-100 dark:border-gray-800 transition-colors duration-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-14">
-          <Link to="/" className="text-xl font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 transition-colors">
-            HotelCompare
+          <Link to="/" className="text-lg font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors">
+            OTELIER-WEB
           </Link>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <ThemeToggle />
             {isAuthenticated && (
               <>
                 <Link
                   to="/"
-                  className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white text-sm font-medium transition-colors"
+                  className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
                 >
                   Dashboard
                 </Link>
-                <span className="text-gray-500 dark:text-gray-400 text-sm">
-                  Compare: {selected.length}
-                </span>
-                {canCompare && (
+                {selected.length > 0 && (
                   <button
                     type="button"
                     onClick={() => navigate('/?compare=open')}
-                    className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 text-sm font-medium transition-colors"
+                    className={`text-sm font-medium transition-colors ${canCompare ? 'text-indigo-600 dark:text-indigo-400 hover:text-indigo-700' : 'text-gray-500 dark:text-gray-400'}`}
                   >
-                    View comparison
+                    Compare {selected.length}
                   </button>
                 )}
-                <span className="text-gray-400 dark:text-gray-500 text-sm">{user?.email}</span>
+                <div className="flex items-center gap-2 pl-2 border-l border-gray-200 dark:border-gray-700">
+                  <div
+                    className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-sm font-medium shrink-0"
+                    aria-hidden
+                  >
+                    {initial}
+                  </div>
+                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                    Hi, {displayName}
+                  </span>
+                </div>
                 <button
                   type="button"
                   onClick={handleSignOut}
-                  className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white text-sm font-medium transition-colors"
+                  className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
                 >
                   Logout
                 </button>
@@ -56,13 +66,13 @@ export function Navbar() {
               <>
                 <Link
                   to="/login"
-                  className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white text-sm font-medium transition-colors"
+                  className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
                 >
                   Login
                 </Link>
                 <Link
                   to="/signup"
-                  className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 text-sm font-medium transition-colors"
+                  className="text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 transition-colors"
                 >
                   Sign up
                 </Link>

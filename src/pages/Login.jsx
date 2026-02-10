@@ -18,8 +18,8 @@ export function Login() {
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4 transition-colors duration-200">
       <div className="w-full max-w-md">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 text-center mb-6">
-          Sign in to HotelCompare
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 text-center mb-8">
+          Sign in to Otelier Web
         </h1>
         {error && (
           <div
@@ -29,9 +29,9 @@ export function Login() {
             {error}
           </div>
         )}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label htmlFor="login-email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label htmlFor="login-email" className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
               Email
             </label>
             <input
@@ -41,11 +41,12 @@ export function Login() {
               onChange={(e) => setEmail(e.target.value)}
               required
               autoComplete="email"
-              className="w-full rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+              className="w-full rounded-lg border border-gray-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 px-3 py-2.5 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+              placeholder="you@example.com"
             />
           </div>
           <div>
-            <label htmlFor="login-password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label htmlFor="login-password" className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
               Password
             </label>
             <input
@@ -55,18 +56,19 @@ export function Login() {
               onChange={(e) => setPassword(e.target.value)}
               required
               autoComplete="current-password"
-              className="w-full rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+              className="w-full rounded-lg border border-gray-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 px-3 py-2.5 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+              placeholder="••••••••"
             />
           </div>
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-indigo-600 dark:bg-indigo-500 text-white rounded-lg px-4 py-2 font-medium hover:bg-indigo-700 dark:hover:bg-indigo-600 disabled:opacity-50 transition-colors"
+            className="w-full bg-indigo-600 dark:bg-indigo-500 text-white rounded-xl px-4 py-2.5 font-medium hover:bg-indigo-700 dark:hover:bg-indigo-600 disabled:opacity-50 transition-colors"
           >
             {loading ? 'Signing in…' : 'Sign in'}
           </button>
         </form>
-        <p className="mt-4 text-center text-sm text-gray-600 dark:text-gray-400">
+        <p className="mt-6 text-center text-sm text-gray-500 dark:text-gray-400">
           Don&apos;t have an account?{' '}
           <Link to="/signup" className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-medium">
             Sign up

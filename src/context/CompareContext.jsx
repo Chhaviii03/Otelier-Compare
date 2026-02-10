@@ -1,4 +1,5 @@
-import { createContext, useCallback, useContext, useEffect, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { scoreAndSuggestHotels } from '../utils/hotelScoring'
 
 const STORAGE_KEY = 'hotel-compare-selection'
 const MAX_COMPARE = 5
@@ -61,8 +62,15 @@ export function CompareProvider({ children }) {
     [selected]
   )
 
+  const { scoredAndSorted, suggestedHotelId } = useMemo(() => {
+    if (selected.length < 2) return { scoredAndSorted: [], suggestedHotelId: null }
+    return scoreAndSuggestHotels(selected)
+  }, [selected])
+
   const value = {
     selected,
+    scoredAndSorted,
+    suggestedHotelId,
     addHotel,
     removeHotel,
     toggleHotel,

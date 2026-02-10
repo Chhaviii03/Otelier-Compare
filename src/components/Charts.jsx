@@ -1,15 +1,14 @@
 import {
   Bar,
   BarChart,
-  CartesianGrid,
   Cell,
-  Legend,
   ResponsiveContainer,
   XAxis,
   YAxis,
 } from 'recharts'
 
-const COLORS = ['#4f46e5', '#059669', '#d97706', '#dc2626', '#7c3aed']
+const INDIGO_MUTED = '#6366f1'
+const INDIGO_LIGHT = '#818cf8'
 
 export function PriceChart({ hotels }) {
   const data = hotels.map((h) => ({
@@ -21,16 +20,14 @@ export function PriceChart({ hotels }) {
   if (data.length === 0) return null
 
   return (
-    <div className="w-full h-64">
+    <div className="w-full h-72">
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={data} margin={{ top: 8, right: 8, left: 8, bottom: 8 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-          <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-          <YAxis tick={{ fontSize: 11 }} />
-          <Legend />
-          <Bar dataKey="price" name="Price (€)" radius={[4, 4, 0, 0]}>
+        <BarChart data={data} margin={{ top: 20, right: 20, left: 8, bottom: 12 }}>
+          <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#6b7280' }} axisLine={false} tickLine={false} />
+          <YAxis tick={{ fontSize: 11, fill: '#6b7280' }} axisLine={false} tickLine={false} width={32} />
+          <Bar dataKey="price" radius={[6, 6, 0, 0]} barSize={28}>
             {data.map((_, i) => (
-              <Cell key={i} fill={COLORS[i % COLORS.length]} />
+              <Cell key={i} fill={i % 2 === 0 ? INDIGO_MUTED : INDIGO_LIGHT} />
             ))}
           </Bar>
         </BarChart>
@@ -49,16 +46,45 @@ export function RatingChart({ hotels }) {
   if (data.length === 0) return null
 
   return (
-    <div className="w-full h-64">
+    <div className="w-full h-72">
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={data} margin={{ top: 8, right: 8, left: 8, bottom: 8 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-          <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-          <YAxis domain={[0, 5]} tick={{ fontSize: 11 }} />
-          <Legend />
-          <Bar dataKey="rating" name="Rating" radius={[4, 4, 0, 0]}>
+        <BarChart data={data} margin={{ top: 20, right: 20, left: 8, bottom: 12 }}>
+          <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#6b7280' }} axisLine={false} tickLine={false} />
+          <YAxis domain={[0, 5]} tick={{ fontSize: 11, fill: '#6b7280' }} axisLine={false} tickLine={false} width={32} />
+          <Bar dataKey="rating" radius={[6, 6, 0, 0]} barSize={28}>
             {data.map((_, i) => (
-              <Cell key={i} fill={COLORS[i % COLORS.length]} />
+              <Cell key={i} fill={i % 2 === 0 ? INDIGO_MUTED : INDIGO_LIGHT} />
+            ))}
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
+  )
+}
+
+/** Distance from airport (km). Uses distance or distanceFromAirport. Lower is better. */
+export function DistanceChart({ hotels }) {
+  const data = hotels.map((h) => {
+    const dist = h.distanceFromAirport ?? h.distance ?? 0
+    const val = typeof dist === 'number' && !Number.isNaN(dist) ? dist : 0
+    return {
+      name: h.name?.slice(0, 12) + (h.name?.length > 12 ? '…' : ''),
+      fullName: h.name,
+      distance: val,
+    }
+  })
+
+  if (data.length === 0) return null
+
+  return (
+    <div className="w-full h-72">
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart data={data} margin={{ top: 20, right: 20, left: 8, bottom: 12 }}>
+          <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#6b7280' }} axisLine={false} tickLine={false} />
+          <YAxis tick={{ fontSize: 11, fill: '#6b7280' }} axisLine={false} tickLine={false} width={32} />
+          <Bar dataKey="distance" radius={[6, 6, 0, 0]} barSize={28} name="km">
+            {data.map((_, i) => (
+              <Cell key={i} fill={i % 2 === 0 ? INDIGO_MUTED : INDIGO_LIGHT} />
             ))}
           </Bar>
         </BarChart>

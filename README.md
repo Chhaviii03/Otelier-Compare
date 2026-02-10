@@ -1,11 +1,12 @@
-# HotelCompare
+# OTELIER-WEB
 
-A hospitality-focused React frontend with Supabase auth, Amadeus hotel search, filters, pagination, and hotel comparison charts. Built for a take-home assignment (React 18, Vite, Tailwind, Context API, Recharts).
+A hospitality-focused mini product: React 18 + Vite + Tailwind with Supabase auth, **location-based hotel search** (Google Places Autocomplete), Amadeus API, and hotel comparison charts.
 
 ## Features
 
 - **Authentication**: Sign up, login, logout via Supabase (email/password). Session/JWT used for protected routes.
-- **Hotel search**: Amadeus API integration (OAuth2 + hotel list/offers). Filters: city, check-in/out dates, guests.
+- **Location search**: OpenStreetMap Nominatim (free, no API key) for city, neighborhood, or landmark; returns coordinates for radius-based hotel search. No hard-coded city list.
+- **Hotel search**: Amadeus API (OAuth2 + hotel list/offers). Uses latitude/longitude when a location is selected, otherwise falls back to city code. Filters: location, check-in/out dates, guests.
 - **UI**: Dashboard with filter bar, hotel cards (name, price, rating, distance), infinite scroll.
 - **Comparison**: Select up to 5 hotels via checkbox; selection persisted in `localStorage`. Compare drawer with Recharts (price bar chart, rating bar chart). Comparison only enabled when ≥2 hotels selected.
 - **State**: AuthContext (auth state), CompareContext (selected hotels). No Redux.
@@ -19,7 +20,7 @@ A hospitality-focused React frontend with Supabase auth, Amadeus hotel search, f
 
    ```bash
    git clone <repo-url>
-   cd hotel-compare
+   cd otelier-web
    npm install
    ```
 
@@ -29,7 +30,6 @@ A hospitality-focused React frontend with Supabase auth, Amadeus hotel search, f
 
    - `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY`: From [Supabase](https://supabase.com) → Project Settings → API.
    - `VITE_AMADEUS_KEY` / `VITE_AMADEUS_SECRET`: From [Amadeus for Developers](https://developers.amadeus.com) (Self-Service APIs, create an app).
-
 3. **Run locally**
 
    ```bash
@@ -49,7 +49,8 @@ A hospitality-focused React frontend with Supabase auth, Amadeus hotel search, f
 
 - **OAuth**: Client credentials grant to `https://test.api.amadeus.com/v1/security/oauth2/token`. Token is cached until near expiry.
 - **Hotel data**: 
-  - Hotel list by city: `GET /v1/reference-data/locations/hotels/by-city?cityCode=...` to get hotels in a city.
+  - When a location is selected (Nominatim geocoding), we use `GET /v1/reference-data/locations/hotels/by-geocode?latitude=&longitude=&radius=5` for radius-based search. If that endpoint is unavailable, we fall back to by-city (Paris).
+  - Otherwise hotel list by city: `GET /v1/reference-data/locations/hotels/by-city?cityCode=...`.
   - When check-in/out and hotel IDs are available, we optionally call `GET /v2/shopping/hotel-offers` for sample prices; results are merged into the list. If that call fails or isn’t configured, fallback demo price/rating are applied so the UI still works.
 - **Pagination**: Results are paginated in memory (page size 10); infinite scroll fetches the next page when the user scrolls near the bottom and appends to the list.
 - All Amadeus logic lives in `src/api/amadeus.js`; Axios is used for requests. Failures are caught and surfaced as error state on the dashboard.
@@ -80,8 +81,8 @@ A hospitality-focused React frontend with Supabase auth, Amadeus hotel search, f
 - **Build and run** (from project root, with a `.env` file present):
 
   ```bash
-  docker build -t hotel-compare .
-  docker run -p 5173:5173 --env-file .env hotel-compare
+  docker build -t otelier-web .
+  docker run -p 5173:5173 --env-file .env otelier-web
   ```
 
 - **No secrets in the image**: The Dockerfile does not copy or hardcode `.env`. Pass env vars at run time with `--env-file .env`.
@@ -112,6 +113,7 @@ src/
 │   └── useInfiniteScroll.js
 ├── components/
 │   ├── Navbar.jsx
+│   ├── LocationSearch.jsx  # OSM Nominatim geocoding (city, area, landmark; free, no API key)
 │   ├── HotelCard.jsx
 │   ├── Filters.jsx
 │   ├── AdminFilters.jsx # Admin-only filters (price, rating, chain)

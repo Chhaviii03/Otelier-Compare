@@ -64,12 +64,29 @@ export function AdminFilters({ adminFilters, onAdminFiltersChange, disabled }) {
             className="w-full rounded-lg border border-amber-300 bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
           >
             <option value="">Any</option>
-            {[3, 3.5, 4, 4.5, 5].map((r) => (
+            {[1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5].map((r) => (
               <option key={r} value={r}>
                 {r}+
               </option>
             ))}
           </select>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-amber-900 mb-1">
+            Max distance (km)
+          </label>
+          <input
+            type="number"
+            min={0}
+            step={0.5}
+            value={adminFilters.maxDistance ?? ''}
+            onChange={(e) =>
+              handleChange('maxDistance', e.target.value === '' ? '' : Number(e.target.value))
+            }
+            disabled={disabled}
+            placeholder="Any"
+            className="w-full rounded-lg border border-amber-300 bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+          />
         </div>
         <div>
           <label className="block text-sm font-medium text-amber-900 mb-1">
@@ -94,11 +111,11 @@ export function AdminFilters({ adminFilters, onAdminFiltersChange, disabled }) {
 }
 
 /**
- * Apply admin filters to hotel list (client-side). Used when user is admin.
+ * Apply admin filters to hotel list (client-side). Used when role is admin.
  */
 export function applyAdminFilters(hotels, adminFilters) {
   if (!adminFilters || !hotels?.length) return hotels
-  const { minPrice, maxPrice, minRating, chain } = adminFilters
+  const { minPrice, maxPrice, minRating, maxDistance, chain } = adminFilters
   return hotels.filter((h) => {
     const price = h.price != null ? Number(h.price) : null
     if (minPrice !== '' && minPrice != null && (price == null || price < minPrice))
@@ -107,6 +124,10 @@ export function applyAdminFilters(hotels, adminFilters) {
       return false
     const rating = h.rating != null ? Number(h.rating) : null
     if (minRating !== '' && minRating != null && (rating == null || rating < minRating))
+      return false
+    const distance = h.distanceFromAirport ?? h.distance
+    const distNum = distance != null && !Number.isNaN(Number(distance)) ? Number(distance) : null
+    if (maxDistance !== '' && maxDistance != null && distNum != null && distNum > maxDistance)
       return false
     if (chain && !(h.name || '').toLowerCase().includes(chain.toLowerCase()))
       return false
