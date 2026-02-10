@@ -15,3 +15,57 @@ body {
 #root {
   min-height: 100vh;
 }
+
+/* Admin Filters panel: ensure readable text and placeholders on amber background (WCAG-friendly contrast) */
+.admin-panel {
+  background-color: #fef3c7;
+}
+
+.admin-panel input,
+.admin-panel select {
+  color: #1f2937;
+  background-color: #ffffff;
+}
+
+.admin-panel input::placeholder {
+  color: #6b7280;
+  opacity: 1;
+}
+
+.admin-panel select {
+  color: #1f2937;
+}
+
+.admin-panel select option {
+  color: #1f2937;
+}
+
+.admin-panel label {
+  color: #92400e;
+  font-weight: 600;
+}
+
+/* Dark mode: keep admin panel form controls readable (light inputs, dark text) */
+.dark .admin-panel {
+  background-color: #fef3c7;
+}
+
+.dark .admin-panel input,
+.dark .admin-panel select {
+  color: #1f2937;
+  background-color: #ffffff;
+}
+
+.dark .admin-panel input::placeholder {
+  color: #6b7280;
+  opacity: 1;
+}
+
+.dark .admin-panel select option {
+  color: #1f2937;
+}
+
+.dark .admin-panel label {
+  color: #92400e;
+  font-weight: 600;
+}

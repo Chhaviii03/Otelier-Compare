@@ -18,7 +18,7 @@ export function AdminFilters({ adminFilters, onAdminFiltersChange, disabled }) {
   )
 
   return (
-    <div className="bg-amber-50/80 border border-amber-200 rounded-xl p-4 shadow-sm">
+    <div className="admin-panel bg-amber-50/80 border border-amber-200 rounded-xl p-4 shadow-sm">
       <h3 className="text-sm font-semibold text-amber-800 mb-3">Admin filters</h3>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
         <div>
